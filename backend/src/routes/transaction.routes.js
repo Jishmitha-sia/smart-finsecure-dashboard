@@ -8,6 +8,7 @@ const {
   getAllTransactions,
   getTransactionById,
   updateTransaction,
+  deleteTransaction,
   getSpendingStats,
   getFlaggedTransactions,
   markTransactionLegitimate,
@@ -25,8 +26,11 @@ router.get("/", authMiddleware, getAllTransactions);
 // Get single transaction
 router.get("/:id", authMiddleware, getTransactionById);
 
-// ✅ Update transaction
+// Update transaction
 router.put("/:id", authMiddleware, updateTransaction);
+
+// ✅ Delete transaction
+router.delete("/:id", authMiddleware, deleteTransaction);
 
 // Dashboard stats
 router.get("/stats", authMiddleware, getSpendingStats);

@@ -117,7 +117,7 @@ const getTransactionById = async (req, res) => {
 };
 
 /**
- * ✅ Update transaction
+ * Update transaction
  */
 const updateTransaction = async (req, res) => {
   try {
@@ -143,7 +143,6 @@ const updateTransaction = async (req, res) => {
       status,
     } = req.body;
 
-    // Update only provided fields
     if (amount !== undefined) transaction.amount = amount;
     if (category) transaction.category = category;
     if (type && ["debit", "credit"].includes(type)) transaction.type = type;
@@ -162,6 +161,36 @@ const updateTransaction = async (req, res) => {
     console.error("Update transaction error:", error);
     return res.status(500).json({
       message: "Server error while updating transaction",
+    });
+  }
+};
+
+/**
+ * ✅ Delete transaction
+ */
+const deleteTransaction = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const transaction = await Transaction.findOne({
+      where: { id, userId: req.userId },
+    });
+
+    if (!transaction) {
+      return res.status(404).json({
+        message: "Transaction not found",
+      });
+    }
+
+    await transaction.destroy();
+
+    return res.status(200).json({
+      message: "Transaction deleted successfully",
+    });
+  } catch (error) {
+    console.error("Delete transaction error:", error);
+    return res.status(500).json({
+      message: "Server error while deleting transaction",
     });
   }
 };
@@ -274,7 +303,8 @@ module.exports = {
   createTransaction,
   getAllTransactions,
   getTransactionById,
-  updateTransaction, // ✅ new
+  updateTransaction,
+  deleteTransaction, // ✅ new
   getSpendingStats,
   getFlaggedTransactions,
   markTransactionLegitimate,
