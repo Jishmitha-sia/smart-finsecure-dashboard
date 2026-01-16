@@ -1,6 +1,6 @@
 /**
  * Transaction Controller
- * Handles transaction CRUD and analytics
+ * Handles transaction CRUD, analytics, and fraud management
  */
 
 const { Op, fn, col } = require("sequelize");
@@ -40,6 +40,8 @@ const createTransaction = async (req, res) => {
       description,
       merchant,
       location,
+      isFraudulent: false,
+      fraudScore: 0,
     });
 
     return res.status(201).json({
@@ -59,13 +61,14 @@ const createTransaction = async (req, res) => {
  */
 const getAllTransactions = async (req, res) => {
   try {
-    const { page = 1, limit = 10, category, type } = req.query;
+    const { page = 1, limit = 10, category, type, status } = req.query;
     const offset = (page - 1) * limit;
 
     const whereClause = { userId: req.userId };
 
     if (category) whereClause.category = category;
     if (type) whereClause.type = type;
+    if (status) whereClause.status = status;
 
     const { count, rows } = await Transaction.findAndCountAll({
       where: whereClause,
@@ -89,39 +92,58 @@ const getAllTransactions = async (req, res) => {
 };
 
 /**
- * Get spending statistics for dashboard
+ * ✅ Get single transaction details
+ */
+const getTransactionById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const transaction = await Transaction.findOne({
+      where: {
+        id,
+        userId: req.userId, // ensures user isolation
+      },
+    });
+
+    if (!transaction) {
+      return res.status(404).json({
+        message: "Transaction not found",
+      });
+    }
+
+    return res.status(200).json({
+      transaction,
+    });
+  } catch (error) {
+    console.error("Get transaction by ID error:", error);
+    return res.status(500).json({
+      message: "Server error while fetching transaction",
+    });
+  }
+};
+
+/**
+ * Get spending statistics
  */
 const getSpendingStats = async (req, res) => {
   try {
     const userId = req.userId;
 
-    // 1️⃣ Total spent (debit only)
     const totalSpentResult = await Transaction.findOne({
-      where: {
-        userId,
-        type: "debit",
-      },
+      where: { userId, type: "debit" },
       attributes: [[fn("SUM", col("amount")), "totalSpent"]],
       raw: true,
     });
 
     const totalSpent = parseFloat(totalSpentResult.totalSpent || 0);
 
-    // 2️⃣ Spending by category
     const spendingByCategory = await Transaction.findAll({
-      where: {
-        userId,
-        type: "debit",
-      },
-      attributes: [
-        "category",
-        [fn("SUM", col("amount")), "total"],
-      ],
+      where: { userId, type: "debit" },
+      attributes: ["category", [fn("SUM", col("amount")), "total"]],
       group: ["category"],
       raw: true,
     });
 
-    // 3️⃣ Monthly spending trend (last 6 months)
     const monthlySpending = await Transaction.findAll({
       where: {
         userId,
@@ -152,8 +174,68 @@ const getSpendingStats = async (req, res) => {
   }
 };
 
+/**
+ * Get flagged transactions
+ */
+const getFlaggedTransactions = async (req, res) => {
+  try {
+    const flaggedTransactions = await Transaction.findAll({
+      where: {
+        userId: req.userId,
+        isFraudulent: true,
+      },
+      order: [["fraudScore", "DESC"]],
+    });
+
+    return res.status(200).json({
+      flaggedTransactions,
+    });
+  } catch (error) {
+    console.error("Get flagged transactions error:", error);
+    return res.status(500).json({
+      message: "Server error while fetching flagged transactions",
+    });
+  }
+};
+
+/**
+ * Mark transaction as legitimate
+ */
+const markTransactionLegitimate = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const transaction = await Transaction.findOne({
+      where: { id, userId: req.userId },
+    });
+
+    if (!transaction) {
+      return res.status(404).json({
+        message: "Transaction not found",
+      });
+    }
+
+    transaction.isFraudulent = false;
+    transaction.fraudScore = 0;
+    await transaction.save();
+
+    return res.status(200).json({
+      message: "Transaction marked as legitimate",
+      transaction,
+    });
+  } catch (error) {
+    console.error("Mark legitimate error:", error);
+    return res.status(500).json({
+      message: "Server error while updating transaction",
+    });
+  }
+};
+
 module.exports = {
   createTransaction,
   getAllTransactions,
+  getTransactionById, // ✅ new
   getSpendingStats,
+  getFlaggedTransactions,
+  markTransactionLegitimate,
 };
