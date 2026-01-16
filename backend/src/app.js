@@ -2,13 +2,14 @@
  * Express app configuration
  * - Connects to database
  * - Syncs models
- * - Registers middlewares and routes
+ * - Registers routes
  */
 
 const express = require("express");
 const cors = require("cors");
 const { connectDB, sequelize } = require("./config/db");
 const User = require("./models/User");
+const authRoutes = require("./routes/auth.routes");
 
 const app = express();
 
@@ -30,6 +31,9 @@ sequelize
   .catch((error) => {
     console.error("❌ Failed to sync database tables:", error.message);
   });
+
+// Routes
+app.use("/api/auth", authRoutes);
 
 // Health check route
 app.get("/", (req, res) => {
