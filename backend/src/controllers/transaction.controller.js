@@ -65,7 +65,6 @@ const getAllTransactions = async (req, res) => {
     const offset = (page - 1) * limit;
 
     const whereClause = { userId: req.userId };
-
     if (category) whereClause.category = category;
     if (type) whereClause.type = type;
     if (status) whereClause.status = status;
@@ -92,17 +91,14 @@ const getAllTransactions = async (req, res) => {
 };
 
 /**
- * ✅ Get single transaction details
+ * Get single transaction
  */
 const getTransactionById = async (req, res) => {
   try {
     const { id } = req.params;
 
     const transaction = await Transaction.findOne({
-      where: {
-        id,
-        userId: req.userId, // ensures user isolation
-      },
+      where: { id, userId: req.userId },
     });
 
     if (!transaction) {
@@ -111,13 +107,61 @@ const getTransactionById = async (req, res) => {
       });
     }
 
+    return res.status(200).json({ transaction });
+  } catch (error) {
+    console.error("Get transaction error:", error);
+    return res.status(500).json({
+      message: "Server error while fetching transaction",
+    });
+  }
+};
+
+/**
+ * ✅ Update transaction
+ */
+const updateTransaction = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const transaction = await Transaction.findOne({
+      where: { id, userId: req.userId },
+    });
+
+    if (!transaction) {
+      return res.status(404).json({
+        message: "Transaction not found",
+      });
+    }
+
+    const {
+      amount,
+      category,
+      type,
+      description,
+      merchant,
+      location,
+      status,
+    } = req.body;
+
+    // Update only provided fields
+    if (amount !== undefined) transaction.amount = amount;
+    if (category) transaction.category = category;
+    if (type && ["debit", "credit"].includes(type)) transaction.type = type;
+    if (description !== undefined) transaction.description = description;
+    if (merchant !== undefined) transaction.merchant = merchant;
+    if (location !== undefined) transaction.location = location;
+    if (status) transaction.status = status;
+
+    await transaction.save();
+
     return res.status(200).json({
+      message: "Transaction updated successfully",
       transaction,
     });
   } catch (error) {
-    console.error("Get transaction by ID error:", error);
+    console.error("Update transaction error:", error);
     return res.status(500).json({
-      message: "Server error while fetching transaction",
+      message: "Server error while updating transaction",
     });
   }
 };
@@ -180,16 +224,11 @@ const getSpendingStats = async (req, res) => {
 const getFlaggedTransactions = async (req, res) => {
   try {
     const flaggedTransactions = await Transaction.findAll({
-      where: {
-        userId: req.userId,
-        isFraudulent: true,
-      },
+      where: { userId: req.userId, isFraudulent: true },
       order: [["fraudScore", "DESC"]],
     });
 
-    return res.status(200).json({
-      flaggedTransactions,
-    });
+    return res.status(200).json({ flaggedTransactions });
   } catch (error) {
     console.error("Get flagged transactions error:", error);
     return res.status(500).json({
@@ -199,7 +238,7 @@ const getFlaggedTransactions = async (req, res) => {
 };
 
 /**
- * Mark transaction as legitimate
+ * Mark transaction legitimate
  */
 const markTransactionLegitimate = async (req, res) => {
   try {
@@ -234,7 +273,8 @@ const markTransactionLegitimate = async (req, res) => {
 module.exports = {
   createTransaction,
   getAllTransactions,
-  getTransactionById, // ✅ new
+  getTransactionById,
+  updateTransaction, // ✅ new
   getSpendingStats,
   getFlaggedTransactions,
   markTransactionLegitimate,
