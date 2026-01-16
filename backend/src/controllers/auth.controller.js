@@ -1,14 +1,14 @@
 /**
  * Authentication Controller
- * Handles user registration and login logic
+ * Handles user registration, login, and profile
  */
 
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken"); // ✅ FIXED
+const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 /**
- * Register a new user
+ * Register user
  */
 const registerUser = async (req, res) => {
   try {
@@ -50,9 +50,6 @@ const registerUser = async (req, res) => {
 
 /**
  * Login user
- * - Verify email
- * - Compare password
- * - Generate JWT
  */
 const loginUser = async (req, res) => {
   try {
@@ -78,7 +75,6 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // ✅ JWT generation (FIXED)
     const token = jwt.sign(
       { userId: user.id },
       process.env.JWT_SECRET,
@@ -103,4 +99,30 @@ const loginUser = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser };
+/**
+ * Get logged-in user profile
+ */
+const getProfile = async (req, res) => {
+  try {
+    const user = await User.findByPk(req.userId, {
+      attributes: { exclude: ["password"] },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      user,
+    });
+  } catch (error) {
+    console.error("Profile error:", error);
+    return res.status(500).json({
+      message: "Server error fetching profile",
+    });
+  }
+};
+
+module.exports = { registerUser, loginUser, getProfile };
