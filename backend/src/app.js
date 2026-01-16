@@ -14,6 +14,7 @@ require("./models/Transaction");
 
 const authRoutes = require("./routes/auth.routes");
 const transactionRoutes = require("./routes/transaction.routes");
+const dashboardRoutes = require("./routes/dashboard.routes");
 
 const app = express();
 
@@ -39,6 +40,7 @@ sequelize
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/transactions", transactionRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 // Health check
 app.get("/", (req, res) => {
