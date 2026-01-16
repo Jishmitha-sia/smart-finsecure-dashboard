@@ -1,14 +1,12 @@
 /**
  * Transaction Controller
- * Handles creation of user transactions
+ * Handles creation and retrieval of user transactions
  */
 
 const Transaction = require("../models/Transaction");
 
 /**
  * Create a new transaction
- * - Requires authentication
- * - Automatically attaches userId from JWT
  */
 const createTransaction = async (req, res) => {
   try {
@@ -21,7 +19,6 @@ const createTransaction = async (req, res) => {
       location,
     } = req.body;
 
-    // Basic validation
     if (!amount || !category || !type) {
       return res.status(400).json({
         message: "Amount, category, and type are required",
@@ -34,9 +31,8 @@ const createTransaction = async (req, res) => {
       });
     }
 
-    // Create transaction
     const transaction = await Transaction.create({
-      userId: req.userId, // from JWT middleware
+      userId: req.userId,
       amount,
       category,
       type,
@@ -57,4 +53,48 @@ const createTransaction = async (req, res) => {
   }
 };
 
-module.exports = { createTransaction };
+/**
+ * Get all transactions for logged-in user
+ * Supports pagination and filtering
+ */
+const getAllTransactions = async (req, res) => {
+  try {
+    const { page = 1, limit = 10, category, type } = req.query;
+
+    const offset = (page - 1) * limit;
+
+    // Build filters dynamically
+    const whereClause = {
+      userId: req.userId,
+    };
+
+    if (category) {
+      whereClause.category = category;
+    }
+
+    if (type) {
+      whereClause.type = type;
+    }
+
+    const { count, rows } = await Transaction.findAndCountAll({
+      where: whereClause,
+      order: [["createdAt", "DESC"]],
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+    });
+
+    return res.status(200).json({
+      totalTransactions: count,
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(count / limit),
+      transactions: rows,
+    });
+  } catch (error) {
+    console.error("Get transactions error:", error);
+    return res.status(500).json({
+      message: "Server error while fetching transactions",
+    });
+  }
+};
+
+module.exports = { createTransaction, getAllTransactions };
