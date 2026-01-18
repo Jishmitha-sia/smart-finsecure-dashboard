@@ -21,12 +21,31 @@ const app = express();
 
 // Enable CORS with environment-aware origins
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+  origin: function (origin, callback) {
+    const allowedOrigins = process.env.CORS_ORIGIN 
+      ? process.env.CORS_ORIGIN.split(',') 
+      : ["http://localhost:5173"];
+    
+    // Allow requests with no origin (like mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    // Check if origin matches exactly or is a Vercel preview URL
+    const isAllowed = allowedOrigins.some(allowed => 
+      origin === allowed || 
+      origin.includes('.vercel.app')
+    );
+    
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
-console.log("🔐 CORS_ORIGIN set to:", corsOptions.origin);
+console.log("🔐 CORS_ORIGIN set to:", process.env.CORS_ORIGIN || "http://localhost:5173");
 console.log("🔐 CORS Methods:", corsOptions.methods);
 console.log("🔐 CORS Credentials:", corsOptions.credentials);
 app.use(cors(corsOptions));
