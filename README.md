@@ -2,6 +2,8 @@
 
 A premium real-time financial fraud detection dashboard with ML-powered risk scoring, built with React, Express, and Flask.
 
+**Assessment Status:** ✅ Completed (Frontend + Backend + ML service deployed and verified)
+
 ---
 
 ## 🚀 Live Deployment
@@ -11,6 +13,7 @@ A premium real-time financial fraud detection dashboard with ML-powered risk sco
 | **Frontend** | https://smart-finsecure-dashboard-b0kwxyyc4-jishmitha-sias-projects.vercel.app | ✅ Live |
 | **Backend API** | https://smart-finsecure-dashboard-1.onrender.com | ✅ Live |
 | **Database** | Render PostgreSQL | ✅ Live |
+| **ML Service** | Render Flask service (see ML_API_URL) | ✅ Live |
 
 ---
 
@@ -335,7 +338,6 @@ Login with: demo@example.com / Demo@1234
 
 ## 📈 Future Enhancements
 
-- [ ] **Deploy ML service** (currently pending on Render)
 - [ ] **Admin panel**: Override fraud flags, user management
 - [ ] **Dispute system**: Users can contest fraud flags
 - [ ] **Model retraining**: Automated weekly model updates
@@ -411,4 +413,4 @@ For issues or questions:
 
 ---
 
-**Last Updated**: January 18, 2026
+**Last Updated**: January 19, 2026
