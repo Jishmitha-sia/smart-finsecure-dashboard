@@ -23,8 +23,12 @@ const app = express();
 const corsOptions = {
   origin: process.env.CORS_ORIGIN || "http://localhost:5173",
   credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
 console.log("🔐 CORS_ORIGIN set to:", corsOptions.origin);
+console.log("🔐 CORS Methods:", corsOptions.methods);
+console.log("🔐 CORS Credentials:", corsOptions.credentials);
 app.use(cors(corsOptions));
 
 // Parse JSON requests
