@@ -11,37 +11,36 @@ A premium real-time financial fraud detection dashboard with ML-powered risk sco
 | **Frontend** | https://smart-finsecure-dashboard-b0kwxyyc4-jishmitha-sias-projects.vercel.app | ✅ Live |
 | **Backend API** | https://smart-finsecure-dashboard-1.onrender.com | ✅ Live |
 | **Database** | Render PostgreSQL | ✅ Live |
-| **ML Service** | (Deploying) | 🔄 Pending |
 
 ---
 
 ## 🎬 Screenshots & Demo
 
 ### Demo Video
-[![Smart FinSecure Dashboard Demo](https://img.shields.io/badge/Watch-Demo%20Video-blue?style=for-the-badge)](screenshots/2026-01-18%2023-05-42.mp4)
+[![Smart FinSecure Dashboard Demo](https://img.shields.io/badge/Watch-Demo%20Video-blue?style=for-the-badge)](screenshots/demo_video.mp4)
 
 ### UI Screenshots
 
 #### Login Page
-![Login Page](screenshots/Screenshot%202026-01-18%20at%2022-55-41%20Smart%20FinSecure%20Dashboard.png)
+![Login Page](screenshots/login_page.png)
 
-#### Dashboard - Charts & Stats
-![Dashboard](screenshots/Screenshot%202026-01-18%20at%2022-55-57%20Smart%20FinSecure%20Dashboard.png)
+#### Sign Up Page
+![Sign Up](screenshots/signup_page.png)
 
-#### Dashboard - Recent Transactions
-![Recent Transactions](screenshots/Screenshot%202026-01-18%20at%2022-56-20%20Smart%20FinSecure%20Dashboard.png)
+#### Dashboard - Line Chart
+![Dashboard Line Chart](screenshots/dashboard_line_chart.png)
 
-#### Transactions Page - Table
-![Transactions Table](screenshots/Screenshot%202026-01-18%20at%2022-56-27%20Smart%20FinSecure%20Dashboard.png)
+#### Dashboard - Pie Chart
+![Dashboard Pie Chart](screenshots/dashboard_pie_chart.png)
 
-#### Transactions - Add Modal
-![Add Transaction](screenshots/Screenshot%202026-01-18%20at%2022-56-45%20Smart%20FinSecure%20Dashboard.png)
+#### Transactions - List
+![Transactions List](screenshots/transaction_list.png)
+
+#### Transactions - CRUD Operations
+![CRUD Operations](screenshots/transaction_crud_operations.png)
 
 #### Fraud Detection Page
-![Fraud Detection](screenshots/Screenshot%202026-01-18%20at%2022-56-58%20Smart%20FinSecure%20Dashboard.png)
-
-#### Mobile Responsive View
-![Mobile View](screenshots/Screenshot%202026-01-18%20at%2022-57-15%20Smart%20FinSecure%20Dashboard.png)
+![Fraud Detection](screenshots/fraud_detection.png)
 
 ---
 
@@ -320,40 +319,6 @@ Login with: demo@example.com / Demo@1234
 - ✅ **CORS**: Configured for frontend origin only (in production, set `CORS_ORIGIN=*` for now)
 - ✅ **Environment Variables**: Never commit `.env` (use `.env.example`)
 - ⚠️ **TODO**: Rate limiting, input validation, HTTPS enforcement
-
----
-
-##  API Endpoints
-
-### Authentication
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| POST | `/api/auth/register` | ❌ | Create account |
-| POST | `/api/auth/login` | ❌ | Get JWT token |
-| GET | `/api/auth/me` | ✅ | Get profile |
-
-### Transactions
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| GET | `/api/transactions` | ✅ | List user transactions |
-| POST | `/api/transactions` | ✅ | Create transaction |
-| PUT | `/api/transactions/:id` | ✅ | Update transaction |
-| DELETE | `/api/transactions/:id` | ✅ | Delete transaction |
-| GET | `/api/transactions/:id` | ✅ | Get single transaction |
-| GET | `/api/transactions/stats` | ✅ | Get spending stats |
-| GET | `/api/transactions/flagged` | ✅ | Get flagged transactions |
-
-### Dashboard
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| GET | `/api/dashboard/summary` | ✅ | Balance, recent, fraud count |
-| GET | `/api/dashboard/monthly-spending` | ✅ | Monthly chart data |
-| GET | `/api/dashboard/category-breakdown` | ✅ | Spending by category |
-
-### Seed (Demo)
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| POST | `/api/seed` | ❌ | Create demo user + 25 transactions |
 
 ---
 
