@@ -12,3 +12,14 @@ yarn-error.log*
 # OS files
 .DS_Store
 Thumbs.db
+
+# Python virtual environments
+**/.venv/
+**/venv/
+**/env/
+
+# Python caches and artifacts
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd

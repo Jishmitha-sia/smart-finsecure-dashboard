@@ -4,7 +4,61 @@
  */
 
 const { Op, fn, col } = require("sequelize");
+const axios = require("axios");
 const Transaction = require("../models/Transaction");
+
+// Helper: encode category string to numeric feature
+const encodeCategory = (category) => {
+  if (!category) return 0;
+  let hash = 0;
+  for (let i = 0; i < category.length; i++) {
+    hash = (hash * 31 + category.charCodeAt(i)) >>> 0;
+  }
+  return hash % 10; // small bucketed encoding
+};
+
+// Helper: compute feature set for ML scoring
+const computeFeatures = async (userId, txInput) => {
+  const now = new Date();
+  const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+
+  // Merchant frequency for this user
+  const merchantFreq = txInput.merchant
+    ? await Transaction.count({
+        where: { userId, merchant: txInput.merchant },
+      })
+    : 0;
+
+  // Recent transactions to compute amount deviation
+  const recentTx = await Transaction.findAll({
+    where: { userId },
+    order: [["createdAt", "DESC"]],
+    limit: 20,
+    attributes: ["amount", "createdAt"],
+  });
+  const avgAmount =
+    recentTx.length > 0
+      ? recentTx.reduce((sum, t) => sum + (t.amount || 0), 0) / recentTx.length
+      : txInput.amount || 0;
+  const amountDeviation = Math.abs((txInput.amount || 0) - avgAmount);
+
+  // Velocity: number of transactions in last hour
+  const velocity = await Transaction.count({
+    where: {
+      userId,
+      createdAt: { [Op.gte]: oneHourAgo },
+    },
+  });
+
+  return {
+    amount: Number(txInput.amount || 0),
+    hour: now.getHours(),
+    category: encodeCategory(txInput.category),
+    merchant_freq: merchantFreq,
+    amount_deviation: Number(amountDeviation),
+    velocity: velocity,
+  };
+};
 
 /**
  * Create a new transaction
@@ -32,6 +86,27 @@ const createTransaction = async (req, res) => {
       });
     }
 
+    // ML scoring
+    let fraudScore = 0;
+    let isFraudulent = false;
+    try {
+      if (process.env.ML_API_URL) {
+        const features = await computeFeatures(req.userId, {
+          amount,
+          category,
+          merchant,
+        });
+        const { data } = await axios.post(process.env.ML_API_URL, features, {
+          timeout: 3000,
+        });
+        fraudScore = Number(data?.fraudScore || 0);
+        isFraudulent = Boolean(data?.isFraud || false);
+      }
+    } catch (mlErr) {
+      console.error("ML scoring error:", mlErr.message);
+      // proceed without blocking transaction creation
+    }
+
     const transaction = await Transaction.create({
       userId: req.userId,
       amount,
@@ -40,8 +115,8 @@ const createTransaction = async (req, res) => {
       description,
       merchant,
       location,
-      isFraudulent: false,
-      fraudScore: 0,
+      isFraudulent,
+      fraudScore,
     });
 
     return res.status(201).json({

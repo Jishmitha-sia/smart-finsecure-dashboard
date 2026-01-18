@@ -23,6 +23,12 @@ router.post("/", authMiddleware, createTransaction);
 // Get all transactions
 router.get("/", authMiddleware, getAllTransactions);
 
+// Dashboard stats (must be BEFORE /:id route)
+router.get("/stats", authMiddleware, getSpendingStats);
+
+// Fraud routes (must be BEFORE /:id route)
+router.get("/flagged", authMiddleware, getFlaggedTransactions);
+
 // Get single transaction
 router.get("/:id", authMiddleware, getTransactionById);
 
@@ -32,11 +38,7 @@ router.put("/:id", authMiddleware, updateTransaction);
 // ✅ Delete transaction
 router.delete("/:id", authMiddleware, deleteTransaction);
 
-// Dashboard stats
-router.get("/stats", authMiddleware, getSpendingStats);
-
-// Fraud routes
-router.get("/flagged", authMiddleware, getFlaggedTransactions);
+// Mark transaction as legitimate
 router.patch("/:id/legitimate", authMiddleware, markTransactionLegitimate);
 
 module.exports = router;
