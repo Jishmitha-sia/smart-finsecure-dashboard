@@ -24,6 +24,7 @@ const corsOptions = {
   origin: process.env.CORS_ORIGIN || "http://localhost:5173",
   credentials: true,
 };
+console.log("🔐 CORS_ORIGIN set to:", corsOptions.origin);
 app.use(cors(corsOptions));
 
 // Parse JSON requests
