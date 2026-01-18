@@ -15,6 +15,36 @@ A premium real-time financial fraud detection dashboard with ML-powered risk sco
 
 ---
 
+## 🎬 Screenshots & Demo
+
+### Demo Video
+[![Smart FinSecure Dashboard Demo](https://img.shields.io/badge/Watch-Demo%20Video-blue?style=for-the-badge)](screenshots/2026-01-18%2023-05-42.mp4)
+
+### UI Screenshots
+
+#### Login Page
+![Login Page](screenshots/Screenshot%202026-01-18%20at%2022-55-41%20Smart%20FinSecure%20Dashboard.png)
+
+#### Dashboard - Charts & Stats
+![Dashboard](screenshots/Screenshot%202026-01-18%20at%2022-55-57%20Smart%20FinSecure%20Dashboard.png)
+
+#### Dashboard - Recent Transactions
+![Recent Transactions](screenshots/Screenshot%202026-01-18%20at%2022-56-20%20Smart%20FinSecure%20Dashboard.png)
+
+#### Transactions Page - Table
+![Transactions Table](screenshots/Screenshot%202026-01-18%20at%2022-56-27%20Smart%20FinSecure%20Dashboard.png)
+
+#### Transactions - Add Modal
+![Add Transaction](screenshots/Screenshot%202026-01-18%20at%2022-56-45%20Smart%20FinSecure%20Dashboard.png)
+
+#### Fraud Detection Page
+![Fraud Detection](screenshots/Screenshot%202026-01-18%20at%2022-56-58%20Smart%20FinSecure%20Dashboard.png)
+
+#### Mobile Responsive View
+![Mobile View](screenshots/Screenshot%202026-01-18%20at%2022-57-15%20Smart%20FinSecure%20Dashboard.png)
+
+---
+
 ## 📋 Quick Start (Live App)
 
 ### Login Credentials
@@ -293,44 +323,7 @@ Login with: demo@example.com / Demo@1234
 
 ---
 
-## 🚨 Troubleshooting
-
-### Frontend → Backend Connection Failed
-**Error**: `CORS header 'Access-Control-Allow-Origin' does not match`
-
-**Solution**:
-1. Check Render backend: **Environment → CORS_ORIGIN** = your Vercel URL
-2. Redeploy backend
-3. Hard refresh frontend: **Ctrl+Shift+R**
-
-### Login Returns 401
-**Error**: `Invalid email or password`
-
-**Solution**:
-1. Verify demo user exists: POST `/api/seed`
-2. Check database on Render PostgreSQL
-3. Ensure JWT_SECRET is same across all instances
-
-### ML Service Returns 500
-**Error**: ML endpoint not responding
-
-**Solution**:
-1. Check Render ML logs: **Logs** tab
-2. Verify `ML_API_URL` in backend is correct
-3. Ensure gunicorn start command: `gunicorn api:app --bind 0.0.0.0:$PORT`
-
-### Transaction Not Getting Fraud Score
-**Error**: `fraudScore` is null
-
-**Solution**:
-1. Check ML service is running
-2. Verify backend can reach ML API (check logs)
-3. Look for errors in Render ML logs
-4. Manually test ML endpoint: `POST /predict` with mock features
-
----
-
-## 📊 API Endpoints
+##  API Endpoints
 
 ### Authentication
 | Method | Endpoint | Auth | Description |
@@ -447,8 +440,8 @@ GitHub: [@Jishmitha-sia](https://github.com/Jishmitha-sia)
 ## 📞 Support
 
 For issues or questions:
-1. Check [Troubleshooting](#-troubleshooting) section
-2. Review Render/Vercel logs
+1. Review Render/Vercel logs
+2. Check backend and frontend console for errors
 3. Open a GitHub issue
 
 ---
