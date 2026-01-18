@@ -7,40 +7,53 @@
 const { Sequelize } = require("sequelize");
 require("dotenv").config();
 
-// Create Sequelize instance
-const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
-  {
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT || 5432,
+// Support both DATABASE_URL (production) and individual env vars (development)
+let sequelize;
+if (process.env.DATABASE_URL) {
+  // Render/Heroku style connection string with SSL required
+  sequelize = new Sequelize(process.env.DATABASE_URL, {
     dialect: "postgres",
-    logging: false, // keep console clean
-  }
-);
-
-// Function to test DB connection
-const connectDB = async () => {
-  try {
-    // First, try to connect to the default postgres database to create our DB if needed
-    const adminSequelize = new Sequelize("postgres", process.env.DB_USER, process.env.DB_PASSWORD, {
+    logging: false,
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
+      },
+    },
+  });
+} else {
+  sequelize = new Sequelize(
+    process.env.DB_NAME,
+    process.env.DB_USER,
+    process.env.DB_PASSWORD,
+    {
       host: process.env.DB_HOST,
       port: process.env.DB_PORT || 5432,
       dialect: "postgres",
       logging: false,
-    });
+    }
+  );
+}
 
-    await adminSequelize.authenticate();
-    
-    // Create database if it doesn't exist
-    await adminSequelize.query(`CREATE DATABASE ${process.env.DB_NAME};`).catch(() => {
-      // Database might already exist, that's fine
-    });
-    
-    await adminSequelize.close();
+// Function to test DB connection
+const connectDB = async () => {
+  try {
+    // In production with DATABASE_URL we just authenticate; local dev can still create DB if needed
+    if (!process.env.DATABASE_URL && process.env.DB_NAME) {
+      const adminSequelize = new Sequelize("postgres", process.env.DB_USER, process.env.DB_PASSWORD, {
+        host: process.env.DB_HOST,
+        port: process.env.DB_PORT || 5432,
+        dialect: "postgres",
+        logging: false,
+      });
 
-    // Now connect to our actual database
+      await adminSequelize.authenticate();
+      await adminSequelize.query(`CREATE DATABASE ${process.env.DB_NAME};`).catch(() => {
+        // Database might already exist, ignore
+      });
+      await adminSequelize.close();
+    }
+
     await sequelize.authenticate();
     console.log("✅ Database connected successfully");
   } catch (error) {

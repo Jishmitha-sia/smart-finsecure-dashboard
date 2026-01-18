@@ -19,8 +19,12 @@ const seedRoutes = require("./routes/seed.routes");
 
 const app = express();
 
-// Enable CORS
-app.use(cors());
+// Enable CORS with environment-aware origins
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+  credentials: true,
+};
+app.use(cors(corsOptions));
 
 // Parse JSON requests
 app.use(express.json());
